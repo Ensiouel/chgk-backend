@@ -77,3 +77,10 @@ func (g *Gocket) join(name string, socket *Socket) {
 	}
 
 }
+
+func (g *Gocket) To(name string) *room {
+	if room, ok := g.rooms[name]; ok {
+		return room
+	}
+	return &room{}
+}
