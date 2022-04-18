@@ -1,10 +1,5 @@
 package gocket
 
-import "reflect"
-
-type EmitterData map[string]interface{}
-type EmitterFunc func(data EmitterData)
-
 type IRoom interface {
 	Emit(string, EmitterData)
 	On(string, EmitterFunc)
@@ -28,8 +23,4 @@ func (room *room) Emit(event string, data EmitterData) {
 
 func (room *room) On(event string, f EmitterFunc) {
 	room.events[event] = f
-}
-
-func (data *EmitterData) Get(name string) reflect.Value {
-	return reflect.ValueOf((*data)[name])
 }
