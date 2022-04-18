@@ -5,10 +5,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func Test() {
-
-}
-
 type Socket struct {
 	IRoom
 	id     uuid.UUID
