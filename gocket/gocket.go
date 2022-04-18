@@ -5,23 +5,21 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 type Gocket struct {
 	upgrader websocket.Upgrader
 	sockets  map[*Socket]bool
-	roomID   uuid.UUID
 	rooms    map[string]*room
 	events   map[string]func(*Socket)
 }
 
 func New() *Gocket {
 	return &Gocket{
-		roomID: uuid.New(),
-		rooms:  map[string]*room{},
-		events: map[string]func(*Socket){},
+		rooms:   map[string]*room{},
+		events:  map[string]func(*Socket){},
+		sockets: map[*Socket]bool{},
 	}
 }
 
@@ -46,6 +44,8 @@ func (g *Gocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if f, ok := g.events["connection"]; ok {
 		go f(socket)
 	}
+
+	fmt.Printf("New connection:\tsocketId = %s, connections = %d\n", socket.id, len(g.sockets))
 
 	go socket.read()
 	go socket.write()
@@ -72,8 +72,8 @@ func (g *Gocket) join(name string, socket *Socket) {
 	} else {
 		room := Room(name)
 		go room.Run()
-		g.rooms[name] = room
 		room.join <- socket
+		g.rooms[name] = room
 	}
 
 }

@@ -3,27 +3,29 @@ package main
 import (
 	"fmt"
 	"gocket/v2/gocket"
+	"log"
+	"net/http"
 )
 
 func main() {
 	server := gocket.New()
+
 	server.OnConnection(func(socket *gocket.Socket) {
 		socket.On("new user", func(data gocket.EmitterData) {
-			socket.Join("chat")
+			socketID := data.Get("id").String()
+
+			fmt.Println(socketID)
 		})
+
+		server.To("test chat").Emit("new user", gocket.EmitterData{
+			"id": socket.GetID().String(),
+		})
+
+		socket.Join("test chat")
 	})
 
-	room := gocket.Room("main")
-	room.On("new user", func(data gocket.EmitterData) {
-		userID := data.Get("user_id").String()
-		userName := data.Get("user_name").String()
-		date := data.Get("date").Int()
-		fmt.Println(userID, userName, date)
-	})
+	fmt.Println("The server is running...")
 
-	room.Emit("new user", gocket.EmitterData{
-		"user_id":   "2faf2qafsv",
-		"user_name": "Rima",
-		"date":      12312313234,
-	})
+	http.Handle("/ws", server)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
