@@ -3,14 +3,14 @@ package gocket
 import "net/http"
 
 type Gocket struct {
-	sockets []*Socket
+	sockets []*socket
 }
 
 func New() *Gocket {
 	return &Gocket{}
 }
 
-func (g *Gocket) OnConnection(f func(socket *Socket)) {
+func (g *Gocket) OnConnection(f func(socket *socket)) {
 
 }
 

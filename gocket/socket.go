@@ -1,5 +1,9 @@
 package gocket
 
-type Socket struct {
+type socket struct {
 	IRoom
+}
+
+func Socket() *socket {
+	return &socket{}
 }
