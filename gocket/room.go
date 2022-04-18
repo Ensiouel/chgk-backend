@@ -6,11 +6,16 @@ type IRoom interface {
 }
 
 type room struct {
-	events map[string]EmitterFunc
+	name    string
+	events  map[string]EmitterFunc
+	join    chan *Socket
+	leave   chan *Socket
+	sockets []*Socket
 }
 
-func Room() *room {
+func Room(name string) *room {
 	return &room{
+		name:   name,
 		events: map[string]EmitterFunc{},
 	}
 }
@@ -23,4 +28,8 @@ func (room *room) Emit(event string, data EmitterData) {
 
 func (room *room) On(event string, f EmitterFunc) {
 	room.events[event] = f
+}
+
+func (room *room) Run() {
+
 }

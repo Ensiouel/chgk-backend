@@ -6,12 +6,14 @@ import (
 )
 
 func main() {
-	// server := gocket.New()
-	// server.OnConnection(func(socket *gocket.Socket) {
-	// 	socket.On("new user", func(data gocket.EmitterData) {})
-	// })
+	server := gocket.New()
+	server.OnConnection(func(socket *gocket.Socket) {
+		socket.On("new user", func(data gocket.EmitterData) {
+			socket.Join("chat")
+		})
+	})
 
-	room := gocket.Room()
+	room := gocket.Room("main")
 	room.On("new user", func(data gocket.EmitterData) {
 		userID := data.Get("user_id").String()
 		userName := data.Get("user_name").String()
