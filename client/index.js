@@ -17,7 +17,6 @@ socket.onmessage = function(event) {
     let message = JSON.parse(event.data);
     if (message.type == 'emit') {
         console.log('event ', message.event);
-
         if (message.event === 'new user') {
             let clients = document.getElementById('clients');
 
@@ -25,11 +24,18 @@ socket.onmessage = function(event) {
             client.innerText = message.data.id;
 
             clients.appendChild(client);
-
         }
         if (message.event === 'your id') {
             let socketId = document.getElementById('socketId');
             socketId.innerHTML = message.data.id;
+        }
+        if (message.event === 'leave user') {
+            let clients = document.getElementById('clients');
+            for (var i = 0; i < clients.childNodes.length; i++) {
+                if (clients.childNodes[i].innerText === message.data.id) {
+                    clients.childNodes.removeChild(clients.childNodes[i]);
+                }
+            }
         }
     }
 };
