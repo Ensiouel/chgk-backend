@@ -1,4 +1,4 @@
-module gocket/v2
+module chgk
 
 go 1.18
 
