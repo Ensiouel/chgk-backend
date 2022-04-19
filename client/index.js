@@ -29,6 +29,14 @@ socket.onmessage = function(event) {
             let socketId = document.getElementById('socketId');
             socketId.innerHTML = message.data.id;
         }
+        if (message.event === 'leave user') {
+            let clients = document.getElementById('clients');
+            for (var i = 0; i < clients.childNodes.length; i++) {
+                if (clients.childNodes[i].innerText === message.data.id) {
+                    clients.childNodes.removeChild(clients.childNodes[i]);
+                }
+            }
+        }
     }
 };
   
