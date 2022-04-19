@@ -34,7 +34,7 @@ func main() {
 		})
 	})
 
-	fmt.Println("The server is running...")
+	fmt.Println("The server is running on port :8080...")
 
 	http.Handle("/ws", server)
 	log.Fatal(http.ListenAndServe(":8080", nil))
