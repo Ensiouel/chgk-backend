@@ -11,13 +11,7 @@ func main() {
 	server := gocket.New()
 
 	server.OnConnection(func(socket *gocket.Socket) {
-		socket.On("new user", func(data gocket.EmitterData) {
-			socketID := data.Get("id").String()
-			fmt.Println(socketID)
-		})
-
 		for s := range server.GetRoom("test chat").GetSockets() {
-			fmt.Println(socket.GetID())
 			socket.Emit("new user", gocket.EmitterData{
 				"id": s.GetID().String(),
 			})
@@ -35,15 +29,11 @@ func main() {
 	})
 
 	server.OnDisconnecting(func(socket *gocket.Socket) {
-
 		for s := range server.GetRoom("test chat").GetSockets() {
-			fmt.Println(socket.GetID())
 			s.Emit("leave user", gocket.EmitterData{
 				"id": socket.GetID().String(),
 			})
 		}
-
-		fmt.Println("мужик ушел")
 	})
 
 	fmt.Println("The server is running on port :8080...")

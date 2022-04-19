@@ -14,6 +14,7 @@ type Socket struct {
 	conn   *websocket.Conn
 	gocket *Gocket
 	events map[string]EmitterFunc
+	close  chan struct{}
 }
 
 func NewSocket(conn *websocket.Conn, gocket *Gocket) *Socket {
@@ -22,11 +23,11 @@ func NewSocket(conn *websocket.Conn, gocket *Gocket) *Socket {
 		conn:   conn,
 		gocket: gocket,
 		events: map[string]EmitterFunc{},
+		close:  make(chan struct{}),
 	}
 }
 
 func (socket *Socket) Emit(event string, data EmitterData) {
-
 	var emitRequest struct {
 		Type  string      `json:"type"`
 		Data  EmitterData `json:"data"`
@@ -72,6 +73,11 @@ func (socket *Socket) read() {
 		if f, ok := socket.events[event.Event]; ok {
 			go f(event.Data)
 		}
+
+		select {
+		case <-socket.close:
+			break
+		}
 	}
 }
 
@@ -82,6 +88,10 @@ func (socket *Socket) write() {
 		socket.room.leave <- socket
 	}()
 	for {
+		select {
+		case <-socket.close:
+			break
+		}
 	}
 }
 

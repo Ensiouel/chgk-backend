@@ -60,6 +60,7 @@ func (g *Gocket) disconnect(socket *Socket) {
 		if f, ok := g.events["disconnect"]; ok {
 			go f(socket)
 		}
+		//socket.close <- struct{}{}
 		delete(g.sockets, socket)
 	}
 }
