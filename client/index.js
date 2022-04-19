@@ -15,22 +15,22 @@ socket.onopen = function(e) {
   
 socket.onmessage = function(event) {
     let message = JSON.parse(event.data);
-    if (message['type'] == 'emit') {
-        console.log('event ', message['event']);
+    if (message.type == 'emit') {
+        console.log('event ', message.event);
 
         
-        if (message['event'] === 'new user') {
+        if (message.event === 'new user') {
             let clients = document.getElementById('clients');
 
             let client = document.createElement("p");
-            client.innerText = message['data']['id'];
+            client.innerText = message.data.id;
 
             clients.appendChild(client);
 
         }
-        if (message['event'] === 'your id') {
+        if (message.event === 'your id') {
             let socketId = document.getElementById('socketId');
-            socketId.innerHTML = message['data']['id'];
+            socketId.innerHTML = message.data.id;
         }
     }
 };
