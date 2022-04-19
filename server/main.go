@@ -35,6 +35,14 @@ func main() {
 	})
 
 	server.OnDisconnecting(func(socket *gocket.Socket) {
+
+		for s := range server.GetRoom("test chat").GetSockets() {
+			fmt.Println(socket.GetID())
+			s.Emit("leave user", gocket.EmitterData{
+				"id": socket.GetID().String(),
+			})
+		}
+
 		fmt.Println("мужик ушел")
 	})
 
