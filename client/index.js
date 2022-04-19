@@ -33,7 +33,7 @@ socket.onmessage = function(event) {
             let clients = document.getElementById('clients');
             for (var i = 0; i < clients.childNodes.length; i++) {
                 if (clients.childNodes[i].innerText === message.data.id) {
-                    clients.childNodes.removeChild(clients.childNodes[i]);
+                    clients.removeChild(clients.childNodes[i]);
                 }
             }
         }
