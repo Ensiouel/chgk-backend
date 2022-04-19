@@ -27,6 +27,10 @@ func (g *Gocket) OnConnection(f func(socket *Socket)) {
 	g.events["connection"] = f
 }
 
+func (g *Gocket) OnDisconnecting(f func(socket *Socket)) {
+	g.events["disconnect"] = f
+}
+
 func (g *Gocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	g.upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
@@ -53,6 +57,9 @@ func (g *Gocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (g *Gocket) disconnect(socket *Socket) {
 	if _, ok := g.sockets[socket]; ok {
+		if f, ok := g.events["disconnect"]; ok {
+			go f(socket)
+		}
 		delete(g.sockets, socket)
 	}
 }

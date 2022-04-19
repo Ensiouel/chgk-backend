@@ -7,10 +7,16 @@
     <title>Client</title>
 </head>
 <body>
-    <div>Статус: <div id="status"></div></div>
-    <div>ID: <div id="socketId"></div></div>
+    <div class="container">Статус: <div id="status"></div></div>
+    <div class="container">ID: <div id="socketId"></div></div>
 
-    <div>Пользователи<div id="clients"></div></div>
+    <div>Пользователи: <ul id="clients"></ul></div>
+
+    <style>
+        .container {
+            display: flex;
+        }
+    </style>
 
     <script src="index.js"></script>
 </body>

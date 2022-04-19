@@ -34,6 +34,10 @@ func main() {
 		})
 	})
 
+	server.OnDisconnecting(func(socket *gocket.Socket) {
+		fmt.Println("мужик ушел")
+	})
+
 	fmt.Println("The server is running on port :8080...")
 
 	http.Handle("/ws", server)
