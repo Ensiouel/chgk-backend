@@ -1,6 +1,7 @@
 package gocket
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -9,25 +10,29 @@ import (
 
 type Socket struct {
 	IRoom
-	id     uuid.UUID
-	room   *room
-	conn   *websocket.Conn
-	gocket *Gocket
-	events map[string]EmitterFunc
-	close  chan struct{}
+	id      uuid.UUID
+	room    *room
+	conn    *websocket.Conn
+	gocket  *Gocket
+	events  map[string]EmitterFunc
+	close   chan struct{}
+	send    chan []byte
+	Storage map[string]string
 }
 
 func NewSocket(conn *websocket.Conn, gocket *Gocket) *Socket {
 	return &Socket{
-		id:     uuid.New(),
-		conn:   conn,
-		gocket: gocket,
-		events: map[string]EmitterFunc{},
-		close:  make(chan struct{}),
+		id:      uuid.New(),
+		conn:    conn,
+		gocket:  gocket,
+		events:  map[string]EmitterFunc{},
+		close:   make(chan struct{}),
+		send:    make(chan []byte),
+		Storage: map[string]string{},
 	}
 }
 
-func (socket *Socket) Emit(event string, data EmitterData) {
+func (socket *Socket) Emit(event string, data *EmitterData) {
 	var emitRequest struct {
 		Type  string      `json:"type"`
 		Data  EmitterData `json:"data"`
@@ -35,11 +40,12 @@ func (socket *Socket) Emit(event string, data EmitterData) {
 	}
 
 	emitRequest.Type = "emit"
-	emitRequest.Data = data
+	emitRequest.Data = *data
 	emitRequest.Event = event
 
-	socket.conn.WriteJSON(&emitRequest)
+	b, _ := json.Marshal(&emitRequest)
 
+	socket.send <- b
 }
 
 func (socket *Socket) On(event string, f EmitterFunc) {
@@ -71,12 +77,7 @@ func (socket *Socket) read() {
 		}
 
 		if f, ok := socket.events[event.Event]; ok {
-			go f(event.Data)
-		}
-
-		select {
-		case <-socket.close:
-			break
+			f(event.Data)
 		}
 	}
 }
@@ -84,13 +85,20 @@ func (socket *Socket) read() {
 func (socket *Socket) write() {
 	defer func() {
 		socket.conn.Close()
-		socket.gocket.disconnect(socket)
-		socket.room.leave <- socket
 	}()
 	for {
 		select {
+		case message, ok := <-socket.send:
+			if !ok {
+				socket.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			if err := socket.conn.WriteMessage(websocket.TextMessage, message); err != nil {
+				return
+			}
 		case <-socket.close:
-			break
+			return
 		}
 	}
 }
@@ -120,5 +128,5 @@ func (socket *Socket) GetRoom() *room {
 	if socket.room != nil {
 		return socket.room
 	}
-	return &room{}
+	return nil
 }

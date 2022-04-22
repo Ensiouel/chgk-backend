@@ -45,22 +45,19 @@ func (g *Gocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	socket := NewSocket(conn, g)
 	g.sockets[socket] = true
 
-	if f, ok := g.events["connection"]; ok {
-		go f(socket)
-	}
-
-	fmt.Printf("New connection:\tsocketId = %s, connections = %d\n", socket.id, len(g.sockets))
-
 	go socket.read()
 	go socket.write()
+
+	if f, ok := g.events["connection"]; ok {
+		f(socket)
+	}
 }
 
 func (g *Gocket) disconnect(socket *Socket) {
 	if _, ok := g.sockets[socket]; ok {
 		if f, ok := g.events["disconnect"]; ok {
-			go f(socket)
+			f(socket)
 		}
-		//socket.close <- struct{}{}
 		delete(g.sockets, socket)
 	}
 }
