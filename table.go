@@ -1,10 +1,12 @@
 package main
 
-import "chgk/gocket"
+import (
+	"chgk/gocket"
+)
 
 func NewTable() *Table {
 	return &Table{
-		Users:      []*User{},
+		Users:      map[*User]bool{},
 		ScoreBoard: map[string]int{"Игроки": 1, "Зрители": 3},
 		PackID:     "",
 		TourID:     0,
@@ -13,7 +15,7 @@ func NewTable() *Table {
 }
 
 type Table struct {
-	Users      []*User
+	Users      map[*User]bool
 	ScoreBoard map[string]int
 	PackID     string
 	TourID     int
@@ -21,7 +23,7 @@ type Table struct {
 }
 
 func (t *Table) ContainsUser(id string) bool {
-	for _, user := range t.Users {
+	for user := range t.Users {
 		if user.ID == id {
 			return true
 		}
@@ -30,7 +32,7 @@ func (t *Table) ContainsUser(id string) bool {
 }
 
 func (t *Table) GetUser(id string) *User {
-	for _, user := range t.Users {
+	for user := range t.Users {
 		if user.ID == id {
 			return user
 		}
@@ -39,8 +41,14 @@ func (t *Table) GetUser(id string) *User {
 }
 
 func (t *Table) State() *gocket.EmitterData {
+	users := make([]*User, 0, len(t.Users))
+
+	for user := range t.Users {
+		users = append(users, user)
+	}
+
 	return &gocket.EmitterData{
-		"users":       t.Users,
+		"users":       users,
 		"score_board": t.ScoreBoard,
 		"pack_id":     t.PackID,
 		"tour_id":     t.TourID,
