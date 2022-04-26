@@ -46,6 +46,10 @@ func main() {
 	})
 
 	server.OnDisconnecting(func(socket *gocket.Socket) {
+		if len(socket.Storage) == 0 {
+			return
+		}
+
 		tableID := socket.Storage["table_id"]
 		userID := socket.Storage["user_id"]
 
