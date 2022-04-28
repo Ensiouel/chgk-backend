@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 var Port = flag.String("port", "4221", "port")
@@ -24,15 +25,22 @@ func main() {
 			socket.Storage["user_id"] = userID
 			socket.Storage["table_id"] = tableID
 
+			var newUserIsMaster bool
 			if _, ok := tables[tableID]; !ok {
 				tables[tableID] = NewTable()
+				newUserIsMaster = true
 			}
 
 			table := tables[tableID]
 
 			var user *User
 			if table.ContainsUser(userID) == false {
-				user = NewUser(userID, userName, UserRoleSpectator, socket, true)
+				userRole := UserRoleSpectator
+				if newUserIsMaster {
+					userRole = UserRoleMaster
+				}
+				user = NewUser(userID, userName, userRole, socket, true)
+
 				table.Users[user] = true
 			} else {
 				user = table.GetUser(userID)
@@ -42,6 +50,29 @@ func main() {
 			socket.Join(tableID)
 			socket.Emit("state", table.State())
 			socket.To(tableID).Emit("user:join", user.State())
+		})
+
+		socket.On("timer:start", func(data gocket.EmitterData) {
+			tableID := socket.Storage["table_id"]
+			table := tables[tableID]
+
+			table.Duration = int(data.Get("duration").Float())
+			table.timerStart = time.Now()
+			table.TimerRunning = true
+
+			timer := time.NewTimer(time.Duration(table.Duration) * time.Second)
+			go func() {
+				for {
+					select {
+					case <-timer.C:
+						table.TimerRunning = false
+						timer.Stop()
+					}
+				}
+			}()
+
+			socket.Emit("state", table.State())
+			socket.To(tableID).Emit("state", table.State())
 		})
 	})
 
@@ -67,7 +98,6 @@ func main() {
 
 			if count == 1 {
 				user.Online = false
-				// delete(table.Users, user)
 				socket.To(tableID).Emit("user:leave", user.State())
 			}
 		}

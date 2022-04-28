@@ -45,7 +45,9 @@ func (g *Gocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	socket := NewSocket(conn, g)
+	g.m.Lock()
 	g.sockets[socket] = true
+	g.m.Unlock()
 
 	go socket.read()
 	go socket.write()

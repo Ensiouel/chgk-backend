@@ -1,6 +1,7 @@
 package gocket
 
 import (
+	"encoding/json"
 	"reflect"
 )
 
@@ -16,6 +17,12 @@ type Emitter struct {
 	sockets []*Socket
 }
 
+type EmitRequest struct {
+	Type  string      `json:"type"`
+	Data  EmitterData `json:"data"`
+	Event string      `json:"event"`
+}
+
 type EmitterData map[string]interface{}
 type EmitterFunc func(data EmitterData)
 
@@ -24,7 +31,14 @@ func (data *EmitterData) Get(name string) reflect.Value {
 }
 
 func (e *Emitter) Emit(event string, data *EmitterData) {
+	request := EmitRequest{
+		Type:  "emit",
+		Data:  *data,
+		Event: event,
+	}
+	b, _ := json.Marshal(&request)
+
 	for _, socket := range e.sockets {
-		socket.Emit(event, data)
+		go socket.EmitBytes(event, b)
 	}
 }

@@ -35,18 +35,17 @@ func NewSocket(conn *websocket.Conn, gocket *Gocket) *Socket {
 }
 
 func (socket *Socket) Emit(event string, data *EmitterData) {
-	var emitRequest struct {
-		Type  string      `json:"type"`
-		Data  EmitterData `json:"data"`
-		Event string      `json:"event"`
-	}
+	request := EmitRequest{}
 
-	emitRequest.Type = "emit"
-	emitRequest.Data = *data
-	emitRequest.Event = event
+	request.Type = "emit"
+	request.Data = *data
+	request.Event = event
+	b, _ := json.Marshal(&request)
 
-	b, _ := json.Marshal(&emitRequest)
+	socket.send <- b
+}
 
+func (socket *Socket) EmitBytes(event string, b []byte) {
 	socket.send <- b
 }
 
