@@ -52,6 +52,14 @@ func main() {
 			socket.To(tableID).Emit("user:join", user.State())
 		})
 
+		socket.On("pack:changeId", func(data gocket.EmitterData) {
+			tableID := socket.Storage["table_id"]
+			table := tables[tableID]
+
+			table.PackID = data.Get("pack_id").String()
+			server.GetRoom(tableID).Emit("state", table.State())
+		})
+
 		socket.On("timer:start", func(data gocket.EmitterData) {
 			tableID := socket.Storage["table_id"]
 			table := tables[tableID]
@@ -71,8 +79,7 @@ func main() {
 				}
 			}()
 
-			socket.Emit("state", table.State())
-			socket.To(tableID).Emit("state", table.State())
+			server.GetRoom(tableID).Emit("state", table.State())
 		})
 	})
 

@@ -33,7 +33,7 @@ func NewRoom(name string) *Room {
 
 func (room *Room) Emit(event string, data *EmitterData) {
 	for socket := range room.sockets {
-		socket.Emit(event, data)
+		go socket.Emit(event, data)
 	}
 }
 
