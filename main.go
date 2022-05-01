@@ -60,6 +60,33 @@ func main() {
 			server.GetRoom(tableID).Emit("state", table.State())
 		})
 
+		socket.On("question:choice", func(data gocket.EmitterData) {
+			tableID := socket.Storage["table_id"]
+			table := tables[tableID]
+
+			questionID := data.Get("question").Float()
+
+			table.SelectedQuestion = int(questionID)
+			table.QuestionsPlayed = append(table.QuestionsPlayed, int(questionID))
+
+			socket.To(tableID).Emit("state", table.State())
+		})
+
+		socket.On("wheel:start", func(data gocket.EmitterData) {
+			tableID := socket.Storage["table_id"]
+			table := tables[tableID]
+
+			questionID := 0
+			questionID, table.ranges = randPop(table.ranges)
+
+			fmt.Println("questionID:", questionID)
+
+			server.GetRoom(tableID).Emit("wheel:spin", &gocket.EmitterData{
+				"question":   questionID,
+				"spin_count": 3,
+			})
+		})
+
 		socket.On("timer:start", func(data gocket.EmitterData) {
 			tableID := socket.Storage["table_id"]
 			table := tables[tableID]

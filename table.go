@@ -7,13 +7,16 @@ import (
 
 func NewTable() *Table {
 	return &Table{
-		Users:        map[*User]bool{},
-		ScoreBoard:   map[string]int{"Игроки": 1, "Зрители": 3},
-		PackID:       "",
-		TourID:       0,
-		Open:         true,
-		Duration:     0,
-		TimerRunning: false,
+		Users:            map[*User]bool{},
+		ScoreBoard:       map[string]int{"Игроки": 1, "Зрители": 3},
+		PackID:           "",
+		TourID:           0,
+		Open:             true,
+		Duration:         0,
+		TimerRunning:     false,
+		QuestionsPlayed:  []int{},
+		ranges:           ranges(12),
+		SelectedQuestion: -1,
 	}
 }
 
@@ -27,6 +30,9 @@ type Table struct {
 	TimerRunning     bool
 	timerStart       time.Time
 	secondsRemaining int64
+	QuestionsPlayed  []int
+	ranges           []int
+	SelectedQuestion int
 }
 
 func (t *Table) ContainsUser(id string) bool {
@@ -69,5 +75,7 @@ func (t *Table) State() *gocket.EmitterData {
 		"duration":          t.Duration,
 		"timer_running":     t.TimerRunning,
 		"seconds_remaining": t.secondsRemaining,
+		"questions_played":  t.QuestionsPlayed,
+		"selected_question": t.SelectedQuestion,
 	}
 }
