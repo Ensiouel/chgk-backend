@@ -54,16 +54,15 @@ func (t *Table) GetUser(id string) *User {
 }
 
 func (t *Table) State() *gocket.EmitterData {
-	users := make([]*User, 0, len(t.Users))
-
-	for user := range t.Users {
-		users = append(users, user)
-	}
-
 	if t.TimerRunning {
 		t.secondsRemaining = int64(t.Duration*1000) - time.Now().Sub(t.timerStart).Milliseconds()
 	} else {
 		t.secondsRemaining = 0.0
+	}
+
+	users := []*User{}
+	for user := range t.Users {
+		users = append(users, user)
 	}
 
 	return &gocket.EmitterData{

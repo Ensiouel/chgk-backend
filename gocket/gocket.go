@@ -1,8 +1,6 @@
 package gocket
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"sync"
 
@@ -10,6 +8,7 @@ import (
 )
 
 type Gocket struct {
+	Blogger  *Blogger
 	upgrader websocket.Upgrader
 	sockets  map[*Socket]bool
 	rooms    map[string]*Room
@@ -22,6 +21,7 @@ func New() *Gocket {
 		rooms:   map[string]*Room{},
 		events:  map[string]func(*Socket){},
 		sockets: map[*Socket]bool{},
+		Blogger: NewBlogger(),
 	}
 }
 
@@ -40,7 +40,7 @@ func (g *Gocket) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	conn, err := g.upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		g.Blogger.Err.Println(err)
 		return
 	}
 
@@ -68,7 +68,6 @@ func (g *Gocket) disconnect(socket *Socket) {
 
 func (g *Gocket) join(name string, socket *Socket) {
 	if socket == nil {
-		fmt.Println("something wrong", socket.room)
 		return
 	}
 

@@ -17,6 +17,10 @@ func randPop(s []int) (int, []int) {
 		return s[0], []int{}
 	}
 
+	if len(s) == 0 {
+		return -1, []int{}
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	n := rand.Intn(len(s))
 	v := s[n]
